@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SAP P2P Cycle Simulator</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">S</span>
+        <span class="logo-text">P2P SIMULATOR</span>
+      </div>
+      <span class="header-sep"></span>
+      <span class="subtitle">SAP MM · Procure-to-Pay · End-to-End</span>
+      <div class="header-status">
+        <span class="status-dot"></span>
+        <span>SYSTEM ONLINE</span>
+      </div>
+      <div class="header-user">
+        <span class="user-icon">👤</span>
+        <span>SAI KRISHNA DHAL 23053236</span>
+    </div>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <!-- Progress Stepper -->
+    <section class="stepper-section">
+      <div class="stepper" id="stepper">
+        <div class="step active" data-step="1">
+          <div class="step-circle">1</div>
+          <div class="step-label">Purchase<br>Requisition</div>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step" data-step="2">
+          <div class="step-circle">2</div>
+          <div class="step-label">RFQ /<br>Quotation</div>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step" data-step="3">
+          <div class="step-circle">3</div>
+          <div class="step-label">Purchase<br>Order</div>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step" data-step="4">
+          <div class="step-circle">4</div>
+          <div class="step-label">Goods<br>Receipt</div>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step" data-step="5">
+          <div class="step-circle">5</div>
+          <div class="step-label">Invoice<br>Verification</div>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step" data-step="6">
+          <div class="step-circle">6</div>
+          <div class="step-label">Vendor<br>Payment</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Step Cards -->
+    <section class="step-forms" id="step-forms">
+
+      <!-- Step 1: Purchase Requisition -->
+      <div class="form-card active" id="form-step-1">
+        <div class="card-header">
+          <div class="card-badge pr">PR</div>
+          <div>
+            <h2 class="card-title">Purchase Requisition</h2>
+            <p class="card-meta">T-Code: ME51N &nbsp;|&nbsp; Table: EBAN</p>
+          </div>
+        </div>
+        <p class="card-desc">The stores/production department raises an internal request for materials. No financial commitment is created yet.</p>
+        <div class="form-grid">
+          <div class="field-group">
+            <label>Material Description</label>
+            <input type="text" id="pr-material" placeholder="e.g. Steel Sheets STEEL-001" value="Steel Sheets STEEL-001" />
+          </div>
+          <div class="field-group">
+            <label>Quantity Required</label>
+            <input type="number" id="pr-qty" placeholder="500" value="500" min="1" />
+          </div>
+          <div class="field-group">
+            <label>Unit of Measure</label>
+            <select id="pr-uom">
+              <option value="PC">PC – Pieces</option>
+              <option value="KG">KG – Kilograms</option>
+              <option value="MT">MT – Metric Tons</option>
+              <option value="LT">LT – Litres</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label>Requested By (Department)</label>
+            <input type="text" id="pr-dept" placeholder="Production Dept." value="Production Dept." />
+          </div>
+          <div class="field-group">
+            <label>Delivery Date Required</label>
+            <input type="date" id="pr-date" />
+          </div>
+          <div class="field-group">
+            <label>Plant</label>
+            <input type="text" id="pr-plant" placeholder="1001 – Mumbai Plant" value="1001 – Mumbai Plant" />
+          </div>
+        </div>
+        <div class="sap-info-box">
+          <span class="info-label">SAP Tables Updated</span>
+          <span class="table-pill">EBAN</span>
+          <span class="info-note">No accounting entry at this stage.</span>
+        </div>
+        <div class="card-actions">
+          <button class="btn-primary" onclick="submitStep(1)">Create PR &rarr;</button>
+        </div>
+      </div>
+
+      <!-- Step 2: RFQ / Quotation -->
+      <div class="form-card" id="form-step-2">
+        <div class="card-header">
+          <div class="card-badge rfq">RFQ</div>
+          <div>
+            <h2 class="card-title">RFQ / Quotation</h2>
+            <p class="card-meta">T-Code: ME41 / ME47 / ME49 &nbsp;|&nbsp; Tables: EKKO, EKPO (type AN)</p>
+          </div>
+        </div>
+        <p class="card-desc">The purchasing team sends a Request for Quotation to shortlisted vendors. Vendor quotes are entered and compared using ME49 (Price Comparison). The best-price vendor is selected. No financial commitment is created yet.</p>
+        <div class="form-grid">
+          <div class="field-group">
+            <label>Vendor 1 Name</label>
+            <input type="text" id="rfq-v1" value="Steel India Pvt. Ltd." />
+          </div>
+          <div class="field-group">
+            <label>Vendor 1 Quoted Price (₹/unit)</label>
+            <input type="number" id="rfq-p1" value="450" min="1" />
+          </div>
+          <div class="field-group">
+            <label>Vendor 2 Name</label>
+            <input type="text" id="rfq-v2" value="Bharat Metals Ltd." />
+          </div>
+          <div class="field-group">
+            <label>Vendor 2 Quoted Price (₹/unit)</label>
+            <input type="number" id="rfq-p2" value="470" min="1" />
+          </div>
+          <div class="field-group">
+            <label>Vendor 3 Name</label>
+            <input type="text" id="rfq-v3" value="Indo Steel Corp." />
+          </div>
+          <div class="field-group">
+            <label>Vendor 3 Quoted Price (₹/unit)</label>
+            <input type="number" id="rfq-p3" value="460" min="1" />
+          </div>
+          <div class="field-group">
+            <label>RFQ Validity Date</label>
+            <input type="date" id="rfq-validity" />
+          </div>
+          <div class="field-group">
+            <label>Selected Vendor (Lowest Price)</label>
+            <input type="text" id="rfq-selected" readonly placeholder="Auto-selected after comparison" style="background:#f5f5f3;color:#555;" />
+          </div>
+        </div>
+        <div class="rfq-compare" id="rfq-compare"></div>
+        <button class="btn-compare" onclick="compareRFQ()">Compare Quotes (ME49)</button>
+        <div class="sap-info-box" style="margin-top:1rem">
+          <span class="info-label">SAP Tables Updated</span>
+          <span class="table-pill">EKKO</span>
+          <span class="table-pill">EKPO (type AN)</span>
+          <span class="info-note">No accounting entry at this stage.</span>
+        </div>
+        <div class="card-actions">
+          <button class="btn-secondary" onclick="goBack(2)">← Back</button>
+          <button class="btn-primary" onclick="submitStep(2)">Create PO from RFQ &rarr;</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Purchase Order -->
+      <div class="form-card" id="form-step-3">
+        <div class="card-header">
+          <div class="card-badge po">PO</div>
+          <div>
+            <h2 class="card-title">Purchase Order</h2>
+            <p class="card-meta">T-Code: ME21N &nbsp;|&nbsp; Tables: EKKO, EKPO</p>
+          </div>
+        </div>
+        <p class="card-desc">The purchasing team creates a Purchase Order referencing the PR. A financial commitment is created. The PO number (EBELN) links all subsequent documents.</p>
+        <div class="form-grid">
+          <div class="field-group">
+            <label>Vendor Name</label>
+            <input type="text" id="po-vendor" placeholder="e.g. Steel India Ltd" value="Steel India Pvt. Ltd." />
+          </div>
+          <div class="field-group">
+            <label>Unit Price (₹)</label>
+            <input type="number" id="po-price" placeholder="450" value="450" min="1" />
+          </div>
+          <div class="field-group">
+            <label>Payment Terms</label>
+            <select id="po-terms">
+              <option value="NET30">Net 30 Days</option>
+              <option value="NET45">Net 45 Days</option>
+              <option value="NET60">Net 60 Days</option>
+              <option value="IMM">Immediate</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label>Delivery Address</label>
+            <input type="text" id="po-addr" placeholder="Plant 1001, Mumbai" value="Plant 1001, Mumbai" />
+          </div>
+          <div class="field-group">
+            <label>GR-Based Invoice Verification</label>
+            <select id="po-grir">
+              <option value="yes">Yes (Required)</option>
+              <option value="no">No</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label>Purchasing Group</label>
+            <input type="text" id="po-group" placeholder="001 – Raw Materials" value="001 – Raw Materials" />
+          </div>
+        </div>
+        <div class="sap-info-box">
+          <span class="info-label">SAP Tables Updated</span>
+          <span class="table-pill">EKKO</span>
+          <span class="table-pill">EKPO</span>
+          <span class="info-note">Commitment created. No FI posting yet.</span>
+        </div>
+        <div class="card-actions">
+          <button class="btn-secondary" onclick="goBack(3)">← Back</button>
+          <button class="btn-primary" onclick="submitStep(3)">Create PO &rarr;</button>
+        </div>
+      </div>
+
+      <!-- Step 4: Goods Receipt -->
+      <div class="form-card" id="form-step-4">
+        <div class="card-header">
+          <div class="card-badge gr">GR</div>
+          <div>
+            <h2 class="card-title">Goods Receipt</h2>
+            <p class="card-meta">T-Code: MIGO (Mvt 101) &nbsp;|&nbsp; Tables: MKPF, MSEG, MARD</p>
+          </div>
+        </div>
+        <p class="card-desc">The vendor delivers goods. A GR is posted in MIGO with Movement Type 101. Stock increases in MARD and an accounting entry is created.</p>
+        <div class="form-grid">
+          <div class="field-group">
+            <label>Quantity Received</label>
+            <input type="number" id="gr-qty" placeholder="500" value="500" min="1" />
+          </div>
+          <div class="field-group">
+            <label>Storage Location</label>
+            <input type="text" id="gr-sloc" placeholder="0001 – Raw Material Store" value="0001 – Raw Material Store" />
+          </div>
+          <div class="field-group">
+            <label>Delivery Note No.</label>
+            <input type="text" id="gr-dn" placeholder="DN-2024-5501" value="DN-2024-5501" />
+          </div>
+          <div class="field-group">
+            <label>Bill of Lading</label>
+            <input type="text" id="gr-bl" placeholder="BL-MUM-20240915" value="BL-MUM-20240915" />
+          </div>
+        </div>
+        <div class="accounting-entry">
+          <span class="acc-label">Accounting Entry (Auto)</span>
+          <div class="acc-row"><span class="acc-dr">Dr</span><span>Inventory / Stock Account</span></div>
+          <div class="acc-row"><span class="acc-cr">Cr</span><span>GR/IR Clearing Account</span></div>
+        </div>
+        <div class="sap-info-box">
+          <span class="info-label">SAP Tables Updated</span>
+          <span class="table-pill">MKPF</span>
+          <span class="table-pill">MSEG</span>
+          <span class="table-pill">MARD</span>
+          <span class="table-pill">MBEW</span>
+        </div>
+        <div class="card-actions">
+          <button class="btn-secondary" onclick="goBack(4)">← Back</button>
+          <button class="btn-primary" onclick="submitStep(4)">Post GR &rarr;</button>
+        </div>
+      </div>
+
+      <!-- Step 5: Invoice Verification -->
+      <div class="form-card" id="form-step-5">
+        <div class="card-header">
+          <div class="card-badge iv">IV</div>
+          <div>
+            <h2 class="card-title">Invoice Verification (3-Way Match)</h2>
+            <p class="card-meta">T-Code: MIRO &nbsp;|&nbsp; Tables: BKPF, BSEG, BSIK</p>
+          </div>
+        </div>
+        <p class="card-desc">The vendor sends an invoice. SAP performs a 3-way match: PO Qty vs GR Qty vs Invoice Qty. If quantities and amounts match within tolerance, the invoice is posted.</p>
+        <div class="match-panel" id="match-panel">
+          <div class="match-item">
+            <span class="match-label">PO Quantity</span>
+            <span class="match-val" id="match-po-qty">—</span>
+          </div>
+          <div class="match-arrow">↔</div>
+          <div class="match-item">
+            <span class="match-label">GR Quantity</span>
+            <span class="match-val" id="match-gr-qty">—</span>
+          </div>
+          <div class="match-arrow">↔</div>
+          <div class="match-item">
+            <span class="match-label">Invoice Quantity</span>
+            <input type="number" id="iv-qty" class="match-input" value="500" min="1" />
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="field-group">
+            <label>Invoice Number</label>
+            <input type="text" id="iv-inv" placeholder="INV-STEEL-2024-001" value="INV-STEEL-2024-001" />
+          </div>
+          <div class="field-group">
+            <label>Invoice Amount (₹)</label>
+            <input type="number" id="iv-amount" placeholder="225000" value="225000" min="1" />
+          </div>
+          <div class="field-group">
+            <label>Invoice Date</label>
+            <input type="date" id="iv-date" />
+          </div>
+          <div class="field-group">
+            <label>Tax Code</label>
+            <select id="iv-tax">
+              <option value="V0">V0 – 0% (Exempt)</option>
+              <option value="V1">V1 – 5% GST</option>
+              <option value="V2" selected>V2 – 18% GST</option>
+            </select>
+          </div>
+        </div>
+        <div class="accounting-entry">
+          <span class="acc-label">Accounting Entry (Auto)</span>
+          <div class="acc-row"><span class="acc-dr">Dr</span><span>GR/IR Clearing Account</span></div>
+          <div class="acc-row"><span class="acc-cr">Cr</span><span>Vendor Account (AP)</span></div>
+        </div>
+        <div class="sap-info-box">
+          <span class="info-label">SAP Tables Updated</span>
+          <span class="table-pill">BKPF</span>
+          <span class="table-pill">BSEG</span>
+          <span class="table-pill">BSIK</span>
+        </div>
+        <div class="card-actions">
+          <button class="btn-secondary" onclick="goBack(5)">← Back</button>
+          <button class="btn-primary" onclick="submitStep(5)">Post Invoice &rarr;</button>
+        </div>
+      </div>
+
+      <!-- Step 6: Vendor Payment -->
+      <div class="form-card" id="form-step-6">
+        <div class="card-header">
+          <div class="card-badge pay">PAY</div>
+          <div>
+            <h2 class="card-title">Vendor Payment</h2>
+            <p class="card-meta">T-Code: F110 &nbsp;|&nbsp; Tables: BKPF, BSEG, BSAK</p>
+          </div>
+        </div>
+        <p class="card-desc">The Automatic Payment Program (F110) runs on the due date. SAP clears the vendor open item from BSIK to BSAK and creates a bank posting.</p>
+        <div class="form-grid">
+          <div class="field-group">
+            <label>Payment Method</label>
+            <select id="pay-method">
+              <option value="T">T – Bank Transfer (NEFT/RTGS)</option>
+              <option value="C">C – Cheque</option>
+              <option value="D">D – Direct Debit</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label>Payment Date</label>
+            <input type="date" id="pay-date" />
+          </div>
+          <div class="field-group">
+            <label>Bank Account</label>
+            <input type="text" id="pay-bank" placeholder="HDFC – 0001234567" value="HDFC – 0001234567" />
+          </div>
+          <div class="field-group">
+            <label>Payment Run ID</label>
+            <input type="text" id="pay-runid" placeholder="PAY-2024-09-001" value="PAY-2024-09-001" />
+          </div>
+        </div>
+        <div class="accounting-entry">
+          <span class="acc-label">Accounting Entry (Auto)</span>
+          <div class="acc-row"><span class="acc-dr">Dr</span><span>Vendor Account (AP)</span></div>
+          <div class="acc-row"><span class="acc-cr">Cr</span><span>Bank Account</span></div>
+        </div>
+        <div class="sap-info-box">
+          <span class="info-label">SAP Tables Updated</span>
+          <span class="table-pill">BKPF</span>
+          <span class="table-pill">BSEG</span>
+          <span class="table-pill">BSAK</span>
+          <span class="info-note">Vendor open item cleared. Cycle complete.</span>
+        </div>
+        <div class="card-actions">
+          <button class="btn-secondary" onclick="goBack(6)">← Back</button>
+          <button class="btn-primary" onclick="submitStep(6)">Execute Payment &rarr;</button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Summary Panel (shown after completion) -->
+    <section class="summary-panel hidden" id="summary-panel">
+      <div class="summary-header">
+        <div class="success-icon">✓</div>
+        <h2>P2P Cycle Complete!</h2>
+        <p>All documents have been posted. Here is the full document chain.</p>
+      </div>
+      <div class="doc-chain" id="doc-chain"></div>
+      <div class="summary-table-wrap">
+        <table class="summary-table" id="summary-table">
+          <thead>
+            <tr>
+              <th>Step</th>
+              <th>Document</th>
+              <th>T-Code</th>
+              <th>Key Tables</th>
+              <th>Accounting Impact</th>
+            </tr>
+          </thead>
+          <tbody id="summary-body"></tbody>
+        </table>
+      </div>
+      <button class="btn-restart" onclick="restartCycle()">↺ Start New Cycle</button>
+    </section>
+  </main>
+
+  <!-- Toast Notification -->
+  <div class="toast hidden" id="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
